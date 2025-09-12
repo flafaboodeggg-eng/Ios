@@ -51,8 +51,9 @@ jobs:
           if [ -d "ChatZEUS.swiftpm" ]; then
             cd ChatZEUS.swiftpm
             mkdir -p ../build
-            # تأكد أن اسم الـ scheme صحيح؛ إذا اختلف، عدّله هنا إلى الاسم الصحيح
+            # إذا كان اسم الـ scheme مختلفاً عدّله هنا
             xcodebuild -scheme ChatZEUS \
+                       -destination 'generic/platform=iOS' \
                        -sdk iphoneos \
                        -configuration Release \
                        -archivePath ../build/ChatZEUS.xcarchive \
@@ -60,7 +61,7 @@ jobs:
                        CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
             cd ..
           else
-            echo "لم أجد مجلد ChatZEUS.swiftpm؛ لا يمكن البناء"
+            echo "لا يمكن البناء: لم أجد مجلد ChatZEUS.swiftpm"
             exit 1
           fi
 
