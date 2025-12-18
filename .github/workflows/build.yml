@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: macos-latest
     env:
-      APP_NAME: ChatZEUS   # غيّر هنا إذا كان اسم bundle مختلفًا
+      APP_NAME: Ai Studio   # الاسم الجديد للتطبيق
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,46 +18,46 @@ jobs:
           xcode-version: '16.4'
 
       - name: Unzip Project
-        run: unzip ChatZEUS.zip
+        run: unzip "Ai Studio.zip"
 
       - name: Show available schemes (verify)
         run: |
-          if [ -d "ChatZEUS.swiftpm" ]; then
-            cd ChatZEUS.swiftpm
-            echo "داخل مجلد ChatZEUS.swiftpm — أظهر الـ schemes المتاحة:"
+          if [ -d "Ai Studio.swiftpm" ]; then
+            cd "Ai Studio.swiftpm"
+            echo "داخل مجلد Ai Studio.swiftpm — أظهر الـ schemes المتاحة:"
             xcodebuild -list || true
             cd ..
           else
-            echo "لم أجد مجلد ChatZEUS.swiftpm؛ أدرج محتويات المستودع:"
+            echo "لم أجد مجلد Ai Studio.swiftpm؛ أدرج محتويات المستودع:"
             ls -la
             exit 1
           fi
 
       - name: Build and Archive
         run: |
-          APP_NAME="${APP_NAME:-ChatZEUS}"
-          if [ -d "ChatZEUS.swiftpm" ]; then
-            cd ChatZEUS.swiftpm
+          APP_NAME="${APP_NAME:-Ai Studio}"
+          if [ -d "Ai Studio.swiftpm" ]; then
+            cd "Ai Studio.swiftpm"
             mkdir -p ../build
             echo "بادئ البناء والأرشفة للاسم: $APP_NAME"
             xcodebuild -scheme "$APP_NAME" \
-                       -destination 'generic/platform=iOS' \
-                       -sdk iphoneos \
-                       -configuration Release \
-                       -archivePath ../build/"$APP_NAME".xcarchive \
-                       archive \
-                       CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+              -destination 'generic/platform=iOS' \
+              -sdk iphoneos \
+              -configuration Release \
+              -archivePath ../build/"$APP_NAME".xcarchive \
+              archive \
+              CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
             cd ..
           else
-            echo "لا يمكن البناء: لم أجد مجلد ChatZEUS.swiftpm"
+            echo "لا يمكن البناء: لم أجد مجلد Ai Studio.swiftpm"
             exit 1
           fi
 
       - name: Show archive contents (debug)
         run: |
-          APP_NAME="${APP_NAME:-ChatZEUS}"
+          APP_NAME="${APP_NAME:-Ai Studio}"
           ARCHIVE="build/$APP_NAME.xcarchive"
-          echo "تفاصيل الأرشيف (إن وجدت): $ARCHIVE"
+          echo "تفاصيل الأرشيف: $ARCHIVE"
           if [ -d "$ARCHIVE" ]; then
             ls -la "$ARCHIVE"
             echo "داخل Products/Applications:"
@@ -68,28 +68,26 @@ jobs:
 
       - name: Create unsigned IPA (for signing later with ksign)
         run: |
-          APP_NAME="${APP_NAME:-ChatZEUS}"
+          APP_NAME="${APP_NAME:-Ai Studio}"
           ARCHIVE="build/$APP_NAME.xcarchive"
-          APP_PATH="$ARCHIVE/Products/Applications/$APP_NAME.app"
+          # البحث التلقائي عن ملف .app داخل الأرشيف
+          APP_PATH=$(find "$ARCHIVE/Products/Applications" -name "*.app" | head -n 1)
 
           if [ -d "$APP_PATH" ]; then
             echo "وجدت التطبيق داخل الأرشيف: $APP_PATH"
             rm -rf build/Payload
             mkdir -p build/Payload
             cp -R "$APP_PATH" build/Payload/
-            # أنشئ ملف ipa غير موقّع
-            (cd build && zip -r "${APP_NAME}-unsigned.ipa" Payload)
-            echo "تم إنشاء build/${APP_NAME}-unsigned.ipa"
-            ls -la build/*.ipa || true
+            # إنشاء ملف IPA بالاسم الجديد
+            (cd build && zip -r "Ai-Studio-unsigned.ipa" Payload)
+            echo "تم إنشاء build/Ai-Studio-unsigned.ipa"
           else
-            echo "خطأ: لم أجد التطبيق داخل الأرشيف: $APP_PATH"
-            echo "تفاصيل الأرشيف:"
-            ls -la "$ARCHIVE" || true
+            echo "خطأ: لم أجد التطبيق داخل الأرشيف"
             exit 1
           fi
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ChatZEUS-IPA
+          name: Ai-Studio-IPA
           path: build/*.ipa
